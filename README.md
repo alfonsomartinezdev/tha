@@ -36,7 +36,7 @@ I went with a straightforward approach that prioritizes readability for devs and
 
 - Used BeautifulSoup for robust HTML parsing rather than regex-based HTML manipulation. I'm most comfortable with Ruby, and BeautifulSoup is very similar to Nokogiri.
 - Process matches in reverse order to maintain string indices during replacement. This is me learning from my mistakes in a [previous personal project](https://github.com/alfonsomartinezdev/rpg-annotator-api/blob/320af4633e36dcd8a0f5a6f03c8ead43982dd778/app/services/document_renderer.rb#L23)
-- Changed `section_ids` to a set for O(1) at the last minute lookup performance (noticed this could be improved from my original list implementation)
+- Changed `section_ids` to a set at the last minute for lookup performance (noticed this could be improved from my original list implementation)
 
 ## Given More Time
 
