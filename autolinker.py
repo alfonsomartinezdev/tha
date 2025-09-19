@@ -24,18 +24,18 @@ class AutoLinker:
 
     def find_linkable_nodes(self):
         for text_node in self.content.find_all(string=True):
-            
+
             if self._should_skip_node(text_node):
                 continue
 
             text_to_replace = str(text_node)
             new_text = text_to_replace
 
-            # find matches that link to section IDs
             sections_to_linkify = self._collect_valid_sections(text_to_replace)
 
             for section in reversed(sections_to_linkify):
-                linked = self._linkify(section['full_match'], section['section_num'])
+                linked = self._linkify(
+                    section['full_match'], section['section_num'])
                 new_text = new_text[:section['start']] + \
                     linked + new_text[section['end']:]
 
@@ -43,7 +43,6 @@ class AutoLinker:
                 new_node = BeautifulSoup(new_text, 'html.parser')
                 text_node.replace_with(new_node)
 
-    # wrap valid candidates in href tag
     def _linkify(self, string, section_id):
         result = f'<a href="#{section_id}" style="font-weight: bold; color: red;">{string}</a>'
         return result
@@ -57,13 +56,10 @@ class AutoLinker:
         section_num = match.group(2)
         full_match = match.group(0)
 
-        # skip that 12
         if '.' not in section_num and 'Section' not in full_match:
             return True
 
-        # we want to skip table or chapter references since they're not sections
         start_pos = match.start()
-        # arbitrary 10
         lookback_start = max(0, start_pos - 10)
         preceding_text = text[lookback_start:start_pos]
 
@@ -85,8 +81,8 @@ class AutoLinker:
                 })
         return sections
 
+
 if __name__ == "__main__":
-    # don't forget html file param
     if len(sys.argv) < 2:
         print("enter the name of an input file after the command")
         sys.exit(1)
