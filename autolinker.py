@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 class AutoLinker:
     NUMBER_PATTERN = r'\b(?:(Section)\s+)?(\d+(?:\.\d+)*)\b'
-    NO_GO_PATTERN = r'(?i)\b(?:Tables?|Chapters?)\s+\d+(?:\.\d+)*\b'
+    NO_GO_PATTERN = r'(?i)\b(?:Tables?|Chapters?)\s*$'
 
     def __init__(self, document):
         self.content = BeautifulSoup(document, 'html.parser')
@@ -22,6 +22,23 @@ class AutoLinker:
     def linkify(self, string, section_id):
         result = f'<a href="#{section_id}" style="font-weight: bold; color: red;">{string}</a>'
         return result
+
+    def _should_skip_match(self, match, text):
+        """Determine if a regex match should be skipped."""
+        section_num = match.group(2)
+        full_match = match.group(0)
+        
+        # skip that 12
+        if '.' not in section_num and 'Section' not in full_match:
+            return True
+        
+        # we want to skip table or chapter references since they're not sections
+        start_pos = match.start()
+        # arbitrary 10
+        lookback_start = max(0, start_pos - 10)
+        preceding_text = text[lookback_start:start_pos]
+        
+        return bool(re.search(self.NO_GO_PATTERN, preceding_text))
 
     # Find Link candidates
     def find_linkable_nodes(self):
@@ -40,27 +57,15 @@ class AutoLinker:
             # find matches that link to section IDs
             replacements = []
             for match in re.finditer(self.NUMBER_PATTERN, text_to_replace):
+                if self._should_skip_match(match, text_to_replace):
+                    continue
+
                 section_num = match.group(2)
-                full_match = match.group(0)
-
-                # skip that 12
-                if '.' not in section_num and 'Section' not in full_match:
-                    continue
-
-                start_pos = match.start()
-                # arbitrary 10
-                lookback_start = max(0, start_pos - 10)
-                preceding_text = text_to_replace[lookback_start:start_pos]
-
-                # we want to skip table or chapter references since they're not sections
-                if re.search(r'(?i)\b(?:Tables?|Chapters?)\s*$', preceding_text):
-                    continue
-
                 if section_num in self.section_ids:
                     replacements.append({
                         'start': match.start(),
                         'end': match.end(),
-                        'full_match': full_match
+                        'full_match': match.group(0)
                     })
 
             for rep in reversed(replacements):
