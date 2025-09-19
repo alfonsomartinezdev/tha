@@ -9,7 +9,7 @@ class AutoLinker:
 
     def __init__(self, document):
         self.content = BeautifulSoup(document, 'html.parser')
-        self.section_ids = []
+        self.section_ids = set()
 
     def render(self):
         self._find_section_ids()
@@ -20,7 +20,7 @@ class AutoLinker:
         for element in self.content.find_all(id=True):
             section_id = element.get('id')
             if section_id and re.match(self.NUMBER_PATTERN, section_id):
-                self.section_ids.append(section_id)
+                self.section_ids.add(section_id)
 
     def _linkify_text_nodes(self):
         for text_node in self.content.find_all(string=True):
