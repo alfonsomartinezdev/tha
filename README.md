@@ -19,7 +19,7 @@ The script takes the HTML file as a command-line argument and prints the modifie
 
 ## Approach
 
-I went with a straightforward approach that prioritizes readability:
+I went with a straightforward approach that prioritizes readability for devs and users:
 
 1. *First pass*: Collect all valid section IDs from the document (anything with an `id` attribute matching our section number pattern)
 2. *Second pass*: Find and linkify section references in text nodes. **We're determining what a "section reference" is through a mixture of regex and comparing against the section IDs we collected earlier**.
