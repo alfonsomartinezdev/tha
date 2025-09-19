@@ -12,17 +12,17 @@ class AutoLinker:
         self.section_ids = []
 
     def render(self):
-        self.find_section_ids()
-        self.find_linkable_nodes()
+        self._find_section_ids()
+        self._linkify_text_nodes()
         return self.content
 
-    def find_section_ids(self):
+    def _find_section_ids(self):
         for element in self.content.find_all(id=True):
             section_id = element.get('id')
             if section_id and re.match(self.NUMBER_PATTERN, section_id):
                 self.section_ids.append(section_id)
 
-    def find_linkable_nodes(self):
+    def _linkify_text_nodes(self):
         for text_node in self.content.find_all(string=True):
 
             if self._should_skip_node(text_node):
