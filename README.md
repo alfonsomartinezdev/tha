@@ -1,6 +1,6 @@
 # UpCodes Autolinker - Take Home Assignment
 
-Hey folks! Thanks for reviewing my submission. Your job application actually inspired me to take a crack at a [document annotator](https://github.com/alfonsomartinezdev/rpg-annotator-frontend) for tabletop RPG handouts, so I was very excited to try out a different type of implementation (section based vs character by character offsets).
+Hey folks! Thanks for reviewing my submission. Your job application actually inspired me to take a crack at a [document annotator](https://github.com/alfonsomartinezdev/rpg-annotator-frontend) for tabletop RPG handouts, so I was very excited to try out a different use case (section based vs character by character offsets).
 
 Here's my implementation of the autolinker functionality.
 
