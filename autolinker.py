@@ -2,8 +2,8 @@ import re
 import sys
 from bs4 import BeautifulSoup
 
-
 class AutoLinker:
+  
     def __init__(self, document):
         self.content = BeautifulSoup(document, 'html.parser')
         self.section_ids = []
@@ -12,29 +12,54 @@ class AutoLinker:
     def find_section_ids(self):
         for element in self.content.find_all(id=True):
             section_id = element.get('id')
-            if section_id and re.match(r'\d+(?:\.\d+)*', section_id):
+            if section_id and re.match(r'\b(?:(Section)\s+)?(\d+(?:\.\d+)*)\b', section_id):
                 self.section_ids.append(section_id)
 
     # wrap valid candidates in href tag
     def linkify(self, string):
-        result = f"<link>{string}<link>"
+        result = f'<span style="font-weight: bold; color: red;">{string}</span>'
         return result
 
     # Find Link candidates
     def find_linkable_nodes(self):
+        # grabbing any dotted numbers and Section if it exists
+        number_pattern = r'\b(?:(Section?)\s+)?(\d+(?:\.\d+)*)\b'
+        
         for text_node in self.content.find_all(string=True):
-
-            # compare link candidates to valid section ids
-            # somewhere in here?
+            parent = text_node.parent
+            if parent.get('class'):
+                parent_classes = parent.get('class')
+                if 'section_title' in parent_classes:
+                    continue
 
             text_to_replace = str(text_node)
-            text_with_link = self.linkify(text_to_replace)
-            new_node = BeautifulSoup(text_with_link, 'html.parser')
-            text_node.replace_with(new_node)
+            new_text = text_to_replace
+            
+            # find matches that link to section IDs
+            replacements = []
+            for match in re.finditer(number_pattern, text_to_replace):
+                section_num = match.group(2)
+                if section_num in self.section_ids:
+                    replacements.append({
+                        'start': match.start(),
+                        'end': match.end(),
+                        'full_match': match.group(0)
+                    })
+            
+            for rep in replacements:
+                linked = self.linkify(rep['full_match'])
+                new_text = new_text[:rep['start']] + linked + new_text[rep['end']:]
+            
+            if new_text != text_to_replace:
+                # print("=====================")
+                # print(f"gonna replace this: {text_to_replace}")
+                # print(f"with this: {new_text}")
+                new_node = BeautifulSoup(new_text, 'html.parser')
+                text_node.replace_with(new_node)
 
     def render(self):
-        self.find_linkable_nodes()
         self.find_section_ids()
+        self.find_linkable_nodes()
         return self.content
 
 
