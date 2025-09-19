@@ -30,6 +30,7 @@ I went with a straightforward approach that prioritizes correctness and readabil
 - **Context-aware matching** - The script avoids linking numbers that appear after "Table" or "Chapter".
 - **Preserve section titles** - Skip linkification inside elements with class "section_title" to avoid self-referential links
 - **Require context for standalone numbers** - A bare "1005" won't be linked, but "Section 1005" or "1005.6" will be (goodbye, random 12)
+- **Made the links RED** so you can quickly tell where I went wrong :)
 
 ### Implementation Notes
 
