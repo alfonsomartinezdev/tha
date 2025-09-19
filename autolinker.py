@@ -19,8 +19,8 @@ class AutoLinker:
                 self.section_ids.append(section_id)
 
     # wrap valid candidates in href tag
-    def linkify(self, string):
-        result = f'<span style="font-weight: bold; color: red;">{string}</span>'
+    def linkify(self, string, section_id):
+        result = f'<a href="#{section_id}" style="font-weight: bold; color: red;">{string}</a>'
         return result
 
     # Find Link candidates
@@ -65,7 +65,7 @@ class AutoLinker:
                     })
 
             for rep in reversed(replacements):
-                linked = self.linkify(rep['full_match'])
+                linked = self.linkify(rep['full_match'], section_num)
                 new_text = new_text[:rep['start']] + \
                     linked + new_text[rep['end']:]
 
