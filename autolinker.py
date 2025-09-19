@@ -24,6 +24,7 @@ class AutoLinker:
 
     def find_linkable_nodes(self):
         for text_node in self.content.find_all(string=True):
+            
             if self._should_skip_node(text_node):
                 continue
 
@@ -31,23 +32,12 @@ class AutoLinker:
             new_text = text_to_replace
 
             # find matches that link to section IDs
-            replacements = []
-            for match in re.finditer(self.NUMBER_PATTERN, text_to_replace):
-                if self._should_skip_match(match, text_to_replace):
-                    continue
+            sections_to_linkify = self._collect_valid_sections(text_to_replace)
 
-                section_num = match.group(2)
-                if section_num in self.section_ids:
-                    replacements.append({
-                        'start': match.start(),
-                        'end': match.end(),
-                        'full_match': match.group(0)
-                    })
-
-            for rep in reversed(replacements):
-                linked = self._linkify(rep['full_match'], section_num)
-                new_text = new_text[:rep['start']] + \
-                    linked + new_text[rep['end']:]
+            for section in reversed(sections_to_linkify):
+                linked = self._linkify(section['full_match'], section['section_num'])
+                new_text = new_text[:section['start']] + \
+                    linked + new_text[section['end']:]
 
             if new_text != text_to_replace:
                 new_node = BeautifulSoup(new_text, 'html.parser')
@@ -79,8 +69,21 @@ class AutoLinker:
 
         return bool(re.search(self.NO_GO_PATTERN, preceding_text))
 
+    def _collect_valid_sections(self, text):
+        sections = []
+        for match in re.finditer(self.NUMBER_PATTERN, text):
+            if self._should_skip_match(match, text):
+                continue
 
-
+            section_num = match.group(2)
+            if section_num in self.section_ids:
+                sections.append({
+                    'start': match.start(),
+                    'end': match.end(),
+                    'full_match': match.group(0),
+                    'section_num': section_num
+                })
+        return sections
 
 if __name__ == "__main__":
     # don't forget html file param
