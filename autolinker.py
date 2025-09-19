@@ -27,17 +27,17 @@ class AutoLinker:
         """Determine if a regex match should be skipped."""
         section_num = match.group(2)
         full_match = match.group(0)
-        
+
         # skip that 12
         if '.' not in section_num and 'Section' not in full_match:
             return True
-        
+
         # we want to skip table or chapter references since they're not sections
         start_pos = match.start()
         # arbitrary 10
         lookback_start = max(0, start_pos - 10)
         preceding_text = text[lookback_start:start_pos]
-        
+
         return bool(re.search(self.NO_GO_PATTERN, preceding_text))
 
     # Find Link candidates
