@@ -2,6 +2,7 @@ import re
 import sys
 from bs4 import BeautifulSoup
 
+
 class AutoLinker:
     SECTION_PATTERN = r'\b(?:(Section)\s+)?(\d+(?:\.\d+)*)\b'
     NO_GO_PATTERN = r'(?i)\b(?:Tables?|Chapters?)\s+\d+(?:\.\d+)*\b'
@@ -26,7 +27,7 @@ class AutoLinker:
     def find_linkable_nodes(self):
         # grabbing any dotted numbers and Section if it exists
         number_pattern = r'\b(?:(Section)\s+)?(\d+(?:\.\d+)*)\b'
-        
+
         for text_node in self.content.find_all(string=True):
             parent = text_node.parent
             if parent.get('class'):
@@ -36,37 +37,38 @@ class AutoLinker:
 
             text_to_replace = str(text_node)
             new_text = text_to_replace
-            
+
             # find matches that link to section IDs
             replacements = []
             for match in re.finditer(number_pattern, text_to_replace):
                 section_num = match.group(2)
                 full_match = match.group(0)
-                
+
                 # skip that 12
                 if '.' not in section_num and 'Section' not in full_match:
                     continue
-                
+
                 start_pos = match.start()
                 # arbitrary 10
                 lookback_start = max(0, start_pos - 10)
                 preceding_text = text_to_replace[lookback_start:start_pos]
-                
+
                 # we want to skip table or chapter references since they're not sections
                 if re.search(r'(?i)\b(?:Tables?|Chapters?)\s*$', preceding_text):
                     continue
-                
+
                 if section_num in self.section_ids:
                     replacements.append({
                         'start': match.start(),
                         'end': match.end(),
                         'full_match': full_match
                     })
-            
+
             for rep in reversed(replacements):
                 linked = self.linkify(rep['full_match'])
-                new_text = new_text[:rep['start']] + linked + new_text[rep['end']:]
-            
+                new_text = new_text[:rep['start']] + \
+                    linked + new_text[rep['end']:]
+
             if new_text != text_to_replace:
                 # print("=====================")
                 # print(f"gonna replace this: {text_to_replace}")
