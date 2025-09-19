@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 
 class AutoLinker:
-    SECTION_PATTERN = r'\b(?:(Section)\s+)?(\d+(?:\.\d+)*)\b'
+    NUMBER_PATTERN = r'\b(?:(Section)\s+)?(\d+(?:\.\d+)*)\b'
     NO_GO_PATTERN = r'(?i)\b(?:Tables?|Chapters?)\s+\d+(?:\.\d+)*\b'
 
     def __init__(self, document):
@@ -15,7 +15,7 @@ class AutoLinker:
     def find_section_ids(self):
         for element in self.content.find_all(id=True):
             section_id = element.get('id')
-            if section_id and re.match(self.SECTION_PATTERN, section_id):
+            if section_id and re.match(self.NUMBER_PATTERN, section_id):
                 self.section_ids.append(section_id)
 
     # wrap valid candidates in href tag
@@ -26,7 +26,6 @@ class AutoLinker:
     # Find Link candidates
     def find_linkable_nodes(self):
         # grabbing any dotted numbers and Section if it exists
-        number_pattern = r'\b(?:(Section)\s+)?(\d+(?:\.\d+)*)\b'
 
         for text_node in self.content.find_all(string=True):
             parent = text_node.parent
@@ -40,7 +39,7 @@ class AutoLinker:
 
             # find matches that link to section IDs
             replacements = []
-            for match in re.finditer(number_pattern, text_to_replace):
+            for match in re.finditer(self.NUMBER_PATTERN, text_to_replace):
                 section_num = match.group(2)
                 full_match = match.group(0)
 
